@@ -23,7 +23,7 @@ import torch
 import torchaudio
 from speechbrain.pretrained import WaveformEnhancement
 import joblib
-from huggingface_hub import hf_hub_url, cached_download
+from huggingface_hub import hf_hub_url, hf_hub_download
 from transformers import AutoImageProcessor, TimesformerForVideoClassification
 from transformers import MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation, AutoFeatureExtractor
 from controlnet_aux import OpenposeDetector, MLSDdetector, HEDdetector, CannyDetector, MidasDetector
@@ -95,10 +95,10 @@ def load_pipes(local_deployment):
             #     "processor": BlipProcessor.from_pretrained(f"{local_fold}/Salesforce/blip-image-captioning-large"),
             #     "device": device
             # },
-            "damo-vilab/text-to-video-ms-1.7b": {
-                "model": DiffusionPipeline.from_pretrained(f"{local_fold}/damo-vilab/text-to-video-ms-1.7b", torch_dtype=torch.float16, variant="fp16"),
-                "device": device
-            },
+            #"damo-vilab/text-to-video-ms-1.7b": {
+            #    "model": DiffusionPipeline.from_pretrained(f"{local_fold}/damo-vilab/text-to-video-ms-1.7b", torch_dtype=torch.float16, variant="fp16"),
+            #    "device": device
+            #},
             # "facebook/maskformer-swin-large-ade": {
             #     "model": MaskFormerForInstanceSegmentation.from_pretrained(f"{local_fold}/facebook/maskformer-swin-large-ade"),
             #     "feature_extractor" : AutoFeatureExtractor.from_pretrained("facebook/maskformer-swin-large-ade"),
@@ -135,7 +135,7 @@ def load_pipes(local_deployment):
             #     "device": device
             # },
             "runwayml/stable-diffusion-v1-5": {
-                "model": DiffusionPipeline.from_pretrained(f"{local_fold}/runwayml/stable-diffusion-v1-5"),
+                "model": DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5"),
                 "device": device
             },
             # "microsoft/speecht5_tts":{
@@ -149,13 +149,13 @@ def load_pipes(local_deployment):
             #     "model": WaveformEnhancement.from_hparams(source="speechbrain/mtl-mimic-voicebank", savedir="models/mtl-mimic-voicebank"),
             #     "device": device
             # },
-            "microsoft/speecht5_vc":{
-                "processor": SpeechT5Processor.from_pretrained(f"{local_fold}/microsoft/speecht5_vc"),
-                "model": SpeechT5ForSpeechToSpeech.from_pretrained(f"{local_fold}/microsoft/speecht5_vc"),
-                "vocoder": SpeechT5HifiGan.from_pretrained(f"{local_fold}/microsoft/speecht5_hifigan"),
-                "embeddings_dataset": load_dataset(f"{local_fold}/Matthijs/cmu-arctic-xvectors", split="validation"),
-                "device": device
-            },
+            #"microsoft/speecht5_vc":{ I MADE THIS CHANGE
+            #    "processor": SpeechT5Processor.from_pretrained(f"{local_fold}/microsoft/speecht5_vc"),
+            #    "model": SpeechT5ForSpeechToSpeech.from_pretrained(f"{local_fold}/microsoft/speecht5_vc"),
+            #    "vocoder": SpeechT5HifiGan.from_pretrained(f"{local_fold}/microsoft/speecht5_hifigan"),
+            #    "embeddings_dataset": load_dataset("Matthijs/cmu-arctic-xvectors", split="validation"),
+            #    "device": device
+            #},
             # "julien-c/wine-quality": {
             #     "model": joblib.load(cached_download(hf_hub_url("julien-c/wine-quality", "sklearn_model.joblib")))
             # },
