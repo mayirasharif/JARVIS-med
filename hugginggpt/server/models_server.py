@@ -271,7 +271,7 @@ def load_pipes(local_deployment):
     if local_deployment in ["full", "standard", "minimal"]:
         controlnet = ControlNetModel.from_pretrained(f"{local_fold}/lllyasviel/sd-controlnet-canny", torch_dtype=torch.float16)
         controlnetpipe = StableDiffusionControlNetPipeline.from_pretrained(
-            f"{local_fold}/runwayml/stable-diffusion-v1-5", controlnet=controlnet, torch_dtype=torch.float16
+            "runwayml/stable-diffusion-v1-5", controlnet=controlnet, torch_dtype=torch.float16
         )
 
         def mlsd_control_network():
