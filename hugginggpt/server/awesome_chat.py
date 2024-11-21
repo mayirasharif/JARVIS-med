@@ -400,7 +400,7 @@ def response_results(input, results, api_key, api_type, api_endpoint):
 def huggingface_model_inference(model_id, data, task):
     task_url = f"https://api-inference.huggingface.co/models/{model_id}" # InferenceApi does not yet support some tasks
     inference = InferenceApi(repo_id=model_id, token=config["huggingface"]["token"])
-    
+    print("Does this work? Are we getting here?")
     # NLP tasks
     if task == "question-answering":
         inputs = {"question": data["text"], "context": (data["context"] if "context" in data else "" )}
@@ -652,6 +652,7 @@ def model_inference(model_id, data, hosted_on, task):
         if hosted_on == "local":
             inference_result = local_model_inference(model_id, data, task)
         elif hosted_on == "huggingface":
+            print("we are on huggingface")
             inference_result = huggingface_model_inference(model_id, data, task)
     except Exception as e:
         print(e)
@@ -672,7 +673,7 @@ def get_model_status(model_id, url, headers, queue = None):
         return True
     else:
         if queue:
-            queue.put((model_id, False, None))
+            queue.put((model_id, True, endpoint_type)) # False, None
         return False
 
 def get_avaliable_models(candidates, topk=5):
@@ -684,6 +685,7 @@ def get_avaliable_models(candidates, topk=5):
         model_id = candidate["id"]
 
         if inference_mode != "local":
+            print("its not local!!!")
             huggingfaceStatusUrl = f"https://api-inference.huggingface.co/status/{model_id}"
             thread = threading.Thread(target=get_model_status, args=(model_id, huggingfaceStatusUrl, HUGGINGFACE_HEADERS, result_queue))
             threads.append(thread)
@@ -832,6 +834,7 @@ def run_task(input, command, results, api_key, api_type, api_endpoint):
             return False
 
         candidates = MODELS_MAP[task][:10]
+        print(candidates)
         all_avaliable_models = get_avaliable_models(candidates, config["num_candidate_models"])
         all_avaliable_model_ids = all_avaliable_models["local"] + all_avaliable_models["huggingface"]
         logger.debug(f"avaliable models on {command['task']}: {all_avaliable_models}")
@@ -877,6 +880,7 @@ def run_task(input, command, results, api_key, api_type, api_endpoint):
                 choose_str = find_json(choose_str)
                 best_model_id, reason, choose  = get_id_reason(choose_str)
                 hosted_on = "local" if best_model_id in all_avaliable_models["local"] else "huggingface"
+                print(hosted_on)
     inference_result = model_inference(best_model_id, args, hosted_on, command['task'])
 
     if "error" in inference_result:
