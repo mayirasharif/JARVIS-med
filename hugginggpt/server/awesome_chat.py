@@ -400,7 +400,6 @@ def response_results(input, results, api_key, api_type, api_endpoint):
 def huggingface_model_inference(model_id, data, task):
     task_url = f"https://api-inference.huggingface.co/models/{model_id}" # InferenceApi does not yet support some tasks
     inference = InferenceApi(repo_id=model_id, token=config["huggingface"]["token"])
-    print("Does this work? Are we getting here?")
     # NLP tasks
     if task == "question-answering":
         inputs = {"question": data["text"], "context": (data["context"] if "context" in data else "" )}
@@ -620,6 +619,7 @@ def local_model_inference(model_id, data, task):
         if "text" in data:
             text = data["text"]
         response = requests.post(task_url, json={"img_url": img_url, "text": text})
+        print(response)
         results = response.json()
         return results
     # AUDIO tasks
@@ -796,7 +796,7 @@ def run_task(input, command, results, api_key, api_type, api_endpoint):
 
     command["args"] = args
     logger.debug(f"parsed task: {command}")
-
+    # ah, i see....so text-to-image already has a local bias... good!
     if task.endswith("-text-to-image") or task.endswith("-control"):
         if inference_mode != "huggingface":
             if task.endswith("-text-to-image"):
@@ -825,6 +825,14 @@ def run_task(input, command, results, api_key, api_type, api_endpoint):
         response = chitchat(messages, api_key, api_type, api_endpoint)
         results[id] = collect_result(command, choose, {"response": response})
         return True
+        """
+    elif task in ["image-classification"]:
+        best_model_id = "manujanu05/breast-cancer-detection-vit"
+        reason = "Vision Transformers provide impressive results with low computational costs"
+        choose = {"id": best_model_id, "reason": reason}
+        logger.debug(f"chosen model: {choose}")
+        hosted_on = "local"
+    """
     else:
         if task not in MODELS_MAP:
             logger.warning(f"no available models on {task} task.")
@@ -874,6 +882,7 @@ def run_task(input, command, results, api_key, api_type, api_endpoint):
                 choose = json.loads(choose_str)
                 reason = choose["reason"]
                 best_model_id = choose["id"]
+                print(all_avaliable_models)
                 hosted_on = "local" if best_model_id in all_avaliable_models["local"] else "huggingface"
             except Exception as e:
                 logger.warning(f"the response [ {choose_str} ] is not a valid JSON, try to find the model id and reason in the response.")
@@ -1004,7 +1013,7 @@ def test():
 
 def cli():
     messages = []
-    print("Welcome to Jarvis! A collaborative system that consists of an LLM as the controller and numerous expert models as collaborative executors. Jarvis can plan tasks, schedule Hugging Face models, generate friendly responses based on your requests, and help you with many things. Please enter your request (`exit` to exit).")
+    print("Welcome to Jarvis-Med! A collaborative system that consists of an LLM as the controller and numerous expert models as collaborative executors. Jarvis can plan tasks, schedule Hugging Face models, generate friendly responses based on your requests, and help you with many things. Please enter your request (`exit` to exit).")
     while True:
         message = input("[ User ]: ")
         if message == "exit":

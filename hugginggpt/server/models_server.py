@@ -10,7 +10,7 @@ from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
 from diffusers.utils import export_to_video
 from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan, SpeechT5ForSpeechToSpeech
 from transformers import BlipProcessor, BlipForConditionalGeneration
-from transformers import TrOCRProcessor, VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer
+from transformers import TrOCRProcessor, VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer, ViTForImageClassification
 from datasets import load_dataset
 from PIL import Image
 import flask
@@ -33,7 +33,6 @@ from controlnet_aux.hed import Network
 from transformers import DPTForDepthEstimation, DPTFeatureExtractor
 import warnings
 import time
-from espnet2.bin.tts_inference import Text2Speech
 import soundfile as sf
 from asteroid.models import BaseModel
 import traceback
@@ -84,6 +83,7 @@ def load_pipes(local_deployment):
     controlnet_sd_pipes = {}
     if local_deployment in ["full"]:
         other_pipes = {
+            """
             "nlpconnect/vit-gpt2-image-captioning":{
                 "model": VisionEncoderDecoderModel.from_pretrained(f"{local_fold}/nlpconnect/vit-gpt2-image-captioning"),
                 "feature_extractor": ViTImageProcessor.from_pretrained(f"{local_fold}/nlpconnect/vit-gpt2-image-captioning"),
@@ -118,10 +118,10 @@ def load_pipes(local_deployment):
                 "model": BaseModel.from_pretrained("JorisCos/DCCRNet_Libri1Mix_enhsingle_16k"),
                 "device": device
             },
-            "espnet/kan-bayashi_ljspeech_vits": {
-                "model": Text2Speech.from_pretrained(f"espnet/kan-bayashi_ljspeech_vits"),
-                "device": device
-            },
+            #"espnet/kan-bayashi_ljspeech_vits": {
+            #    "model": Text2Speech.from_pretrained(f"espnet/kan-bayashi_ljspeech_vits"),
+            #    "device": device
+            #},
             "lambdalabs/sd-image-variations-diffusers": {
                 "model": DiffusionPipeline.from_pretrained(f"{local_fold}/lambdalabs/sd-image-variations-diffusers"), #torch_dtype=torch.float16
                 "device": device
@@ -174,6 +174,7 @@ def load_pipes(local_deployment):
                 "feature_extractor": DPTFeatureExtractor.from_pretrained(f"{local_fold}/Intel/dpt-hybrid-midas"),
                 "device": device
             }
+            """
         }
 
     if local_deployment in ["full", "standard"]:
@@ -210,8 +211,8 @@ def load_pipes(local_deployment):
             #     "model": pipeline(task="zero-shot-image-classification", model=f"{local_fold}/openai/clip-vit-large-patch14"), 
             #     "device": device
             # },
-            "google/owlvit-base-patch32": {
-                "model": pipeline(task="zero-shot-object-detection", model=f"{local_fold}/google/owlvit-base-patch32"), 
+            "google/vit-base-patch16-224": {
+                "model": pipeline(task="image-classification", model=f"{local_fold}/google/vit-base-patch16-224"), 
                 "device": device
             },
             # "microsoft/DialoGPT-medium": {
@@ -340,7 +341,11 @@ def load_pipes(local_deployment):
     pipes = {**standard_pipes, **other_pipes, **controlnet_sd_pipes}
     return pipes
 
-pipes = load_pipes(local_deployment)
+pipes = {"google/vit-base-patch16-224": {
+                "model": pipeline(task="image-classification", model=f"{local_fold}/google/vit-base-patch16-224"), 
+                "device": device
+            }
+}
 
 end = time.time()
 during = end - start
