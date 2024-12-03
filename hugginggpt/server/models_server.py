@@ -214,6 +214,10 @@ def load_pipes(local_deployment):
                 "model": pipeline(task="zero-shot-object-detection", model=f"{local_fold}/google/owlvit-base-patch32"), 
                 "device": device
             },
+            "google/vit-base-patch16-224": {
+                "model": pipeline(task="image-classification", model=f"{local_fold}/google/vit-base-patch16-224"),
+                "device": device
+            },
             # "microsoft/DialoGPT-medium": {
             #     "model": pipeline(task="conversational", model=f"{local_fold}/microsoft/DialoGPT-medium"), 
             #     "device": device
@@ -295,9 +299,9 @@ def load_pipes(local_deployment):
             "scribble-control": {
                 "model": HEDdetector(hed_network)
             },
-            "midas-control": {
-                "model": MidasDetector(model_path=f"{local_fold}/lllyasviel/ControlNet/annotator/ckpts/dpt_hybrid-midas-501f0c75.pt")
-            },
+           # "midas-control": {
+           #     "model": MidasDetector(model_path=f"{local_fold}/lllyasviel/ControlNet/annotator/ckpts/dpt_hybrid-midas-501f0c75.pt")
+           # },
             "canny-control": {
                 "model": CannyDetector()
             },
@@ -347,8 +351,11 @@ during = end - start
 
 print(f"[ ready ] {during}s")
 
+print("Let's begin! still loading...")
+
 @app.route('/running', methods=['GET'])
 def running():
+    print("Are we running? Yes!")
     return jsonify({"running": True})
 
 @app.route('/status/<path:model_id>', methods=['GET'])
@@ -631,5 +638,5 @@ if __name__ == '__main__':
         os.makedirs("public/images")
     if not os.path.exists("public/videos"):
         os.makedirs("public/videos")
-        
+    print("Starting the server up!")
     waitress.serve(app, host="0.0.0.0", port=port)

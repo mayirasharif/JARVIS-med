@@ -594,6 +594,8 @@ def local_model_inference(model_id, data, task):
     if task == "object-detection":
         img_url = data["image"]
         response = requests.post(task_url, json={"img_url": img_url})
+        print("IT'S OVER NOW!!!!!")
+        print(response)
         predicted = response.json()
         if "error" in predicted:
             return predicted
@@ -685,7 +687,6 @@ def get_avaliable_models(candidates, topk=5):
         model_id = candidate["id"]
 
         if inference_mode != "local":
-            print("its not local!!!")
             huggingfaceStatusUrl = f"https://api-inference.huggingface.co/status/{model_id}"
             thread = threading.Thread(target=get_model_status, args=(model_id, huggingfaceStatusUrl, HUGGINGFACE_HEADERS, result_queue))
             threads.append(thread)
@@ -708,7 +709,7 @@ def get_avaliable_models(candidates, topk=5):
 
     for thread in threads:
         thread.join()
-
+    print(all_available_models)
     return all_available_models
 
 def collect_result(command, choose, inference_result):
